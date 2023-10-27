@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/terraform-provider-csbsqlserver
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/google/uuid v1.4.0
