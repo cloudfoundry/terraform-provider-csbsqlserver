@@ -42,10 +42,19 @@
 
 6. Debugging
 
-    1. Run the SQL Server. Read step number 4.
-    2. Run the Shell Script debug configuration created in step number 2.
-    3. Run the configuration Go Remote created in step number 4.
-    3. In the folder examples, modify the `example.tf` file. Change `YOUR_ADMIN_PASSWORD_HERE` and use the selected password introduced in the step number 4: `<YOUR_SUPERADMIN_PASSWORD_HERE>`
-    4. Create a breakpoint in the code you want to debug.
-    5. In the terminal created by the shell script must be a variable associated with the TF process we want to debug. Copy and export it in the same terminal we will execute the next step.
-    5. Run `terraform init`, `terraform plan` and `terraform apply` to execute the client.
+   1. Run the SQL Server. Read step number 4.
+   2. Run the Shell Script debug configuration created in step number 2.
+   3. Run the configuration Go Remote created in step number 4.
+   4. In the folder examples, modify the `example.tf` file. Change `YOUR_ADMIN_PASSWORD_HERE` and use the selected password introduced in the step number 4: `<YOUR_SUPERADMIN_PASSWORD_HERE>`
+   5. Create a breakpoint in the code you want to debug.
+   6. In the terminal created by the shell script must be a variable associated with the TF process we want to debug.
+      Copy and export it in the same terminal we will execute the terraform commands suggested in the next step.
+      Example:
+      ```shell
+       Provider started. To attach Terraform CLI, set the TF_REATTACH_PROVIDERS environment variable with the following:
+       TF_REATTACH_PROVIDERS='{"cloudfoundry.org/cloud-service-broker/csbsqlserver":{"Protocol":"grpc","ProtocolVersion":5,"Pid":191239,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin934126461"}}}'
+      ```
+      ```shell
+      export TF_REATTACH_PROVIDERS='{"cloudfoundry.org/cloud-service-broker/csbsqlserver":{"Protocol":"grpc","ProtocolVersion":5,"Pid":191239,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin934126461"}}}'
+      ```
+   8. Run `terraform init`, `terraform plan` and `terraform apply` to execute the client.
