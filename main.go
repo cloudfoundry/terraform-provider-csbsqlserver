@@ -33,7 +33,7 @@ func main() {
 
 	if debug {
 		// see tf configuration in examples folder
-		opts.ProviderAddr = "cloud-service-broker/csbsqlserver"
+		opts.ProviderAddr = "cloudfoundry.org/cloud-service-broker/csbsqlserver"
 	}
 
 	plugin.Serve(opts)
