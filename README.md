@@ -10,7 +10,7 @@ to manage binding and unbinding operations in a SQL Server instance.
 terraform {
    required_providers {
       csbsqlserver = {
-         source  = "cloud-service-broker/csbsqlserver"
+         source  = "cloudfoundry.org/cloud-service-broker/csbsqlserver"
          version = "1.0.0"
       }
    }
