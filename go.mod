@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/microsoft/go-mssqldb v1.6.0
-	github.com/onsi/ginkgo/v2 v2.13.0
+	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/onsi/gomega v1.30.0
 	golang.org/x/tools v0.14.0
 	honnef.co/go/tools v0.4.6
@@ -19,7 +19,7 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
