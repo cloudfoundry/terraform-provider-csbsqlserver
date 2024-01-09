@@ -2,7 +2,7 @@
 
 VERSION = 1.0.0
 
-GO-VERSION = 1.21.5
+GO-VERSION = 1.21.6
 GO-VER = go$(GO-VERSION)
 
 SRC = $(shell find . -name "*.go" | grep -v "_test\." )
