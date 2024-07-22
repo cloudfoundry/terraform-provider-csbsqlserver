@@ -137,7 +137,7 @@ func testCheckUserCanCreateTable(cnf testCaseCnf, randomTableName, resourceBindi
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		_, err = db.Exec(getCreateTableSQL(randomTableName))
@@ -156,7 +156,7 @@ func testCheckUserCanCreateSchema(cnf testCaseCnf, randomSchemaName, resourceBin
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		_, err = db.Exec(getCreateSchemaSQL(randomSchemaName, cr.username))
@@ -175,7 +175,7 @@ func testCheckUserCanCreateTableInSchema(cnf testCaseCnf, schemaName, randomTabl
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		name := fmt.Sprintf("%s.%s", schemaName, randomTableName)
@@ -195,7 +195,7 @@ func testCheckUserCanWriteContent(cnf testCaseCnf, randomTableName, resourceBind
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		result, err := db.Exec(getInsertRowSQL(randomTableName), fakeContent)
@@ -223,7 +223,7 @@ func testCheckUserCanReadContent(cnf testCaseCnf, randomTableName, resourceBindi
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		var v string
@@ -245,7 +245,7 @@ func testCheckUserCanWriteContentInSchema(cnf testCaseCnf, schemaName, randomTab
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		name := fmt.Sprintf("%s.%s", schemaName, randomTableName)
@@ -274,7 +274,7 @@ func testCheckUserCanReadContentInSchema(cnf testCaseCnf, schemaName, randomTabl
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		name := fmt.Sprintf("%s.%s", schemaName, randomTableName)
@@ -297,7 +297,7 @@ func testCheckSchemaNames(cnf testCaseCnf, resourceBindingName string, expectedS
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		rows, err := db.Query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA")
@@ -353,7 +353,7 @@ func testCheckUserIsNotOwnerOfTheSchema(cnf testCaseCnf, resourceBindingName str
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		found, err := findSchemaByOwner(db, cr.username, expectedSchemaName)
@@ -376,7 +376,7 @@ func testCheckEntityIsOwnerOfTheSchema(cnf testCaseCnf, resourceBindingName stri
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		found, err := findSchemaByOwner(db, roleName, expectedSchemaName)
@@ -399,7 +399,7 @@ func testCheckDropTableInSchema(cnf testCaseCnf, schemaName, randomTableName, re
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		if _, err := db.Exec(fmt.Sprintf("DROP TABLE %s.%s", schemaName, randomTableName)); err != nil {
@@ -417,7 +417,7 @@ func testCheckDroopSchema(cnf testCaseCnf, schemaName, resourceBindingName strin
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		if _, err := db.Exec(fmt.Sprintf("DROP SCHEMA %s", schemaName)); err != nil {
@@ -435,7 +435,7 @@ func testCheckCreateDatabase(cnf testCaseCnf, dbName, resourceBindingName, expec
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		statement := `
@@ -460,7 +460,7 @@ func testCheckAddColumnToTableInSchema(cnf testCaseCnf, schemaName, randomTableN
 			return err
 		}
 
-		db := testhelpers.Connect(cr.username, cr.password, cnf.DatabaseName, cnf.Port)
+		db := testhelpers.Connect(cr.username, cr.password, cnf.getDatabaseName(), cnf.Port)
 		defer db.Close()
 
 		if _, err := db.Exec(fmt.Sprintf("ALTER TABLE %s.%s ADD %s VARCHAR(20) NULL", schemaName, randomTableName, columnName)); err != nil {

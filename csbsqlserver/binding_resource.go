@@ -14,6 +14,7 @@ const (
 	bindingUsername = "username"
 	bindingPassword = "password"
 	bindingRoles    = "roles"
+	bindingDatabase = "database"
 )
 
 func BindingResource() *schema.Resource {
@@ -36,6 +37,11 @@ func BindingResource() *schema.Resource {
 					MaxItems: 100,
 					MinItems: 0,
 				},
+			},
+			bindingDatabase: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
 			},
 		},
 		CreateContext: create,
@@ -67,7 +73,10 @@ func create(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics
 		},
 		func() diag.Diagnostics {
 			conn := m.(*connector.Connector)
-
+			database := d.Get(bindingDatabase).(string)
+			if database != "" {
+				conn.WithDatabase(database)
+			}
 			if err := conn.CreateBinding(ctx, username, password, roles); err != nil {
 				return diag.FromErr(err)
 			}
@@ -91,6 +100,11 @@ func read(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	}
 
 	conn := m.(*connector.Connector)
+
+	database := d.Get(bindingDatabase).(string)
+	if database != "" {
+		conn.WithDatabase(database)
+	}
 
 	ok, err := conn.ReadBinding(ctx, username)
 	if err != nil {
@@ -118,6 +132,10 @@ func delete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics
 	}
 
 	conn := m.(*connector.Connector)
+	database := d.Get(bindingDatabase).(string)
+	if database != "" {
+		conn.WithDatabase(database)
+	}
 
 	if err := conn.DeleteBinding(ctx, username); err != nil {
 		return diag.FromErr(err)

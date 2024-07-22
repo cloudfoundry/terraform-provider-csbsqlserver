@@ -31,6 +31,14 @@ type Connector struct {
 	encoder  *Encoder
 }
 
+func (c *Connector) WithDatabase(database string) *Connector {
+	if database != c.database && database != "" {
+		c.database = database
+		c.encoder = c.encoder.withDatabase(database)
+	}
+	return c
+}
+
 // CreateBinding creates the binding user, adds roles and grants permission to execute store procedures
 // It is idempotent.
 func (c *Connector) CreateBinding(ctx context.Context, username, password string, roles []string) error {

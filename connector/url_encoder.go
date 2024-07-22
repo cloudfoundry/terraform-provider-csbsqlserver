@@ -49,6 +49,11 @@ func NewEncoder(
 	}
 }
 
+func (b *Encoder) withDatabase(database string) *Encoder {
+	b.queryParams[queryParamDatabaseKey] = database
+	return b
+}
+
 func (b *Encoder) Encode() string {
 	u := createURL(b.server, b.username, b.password, b.port)
 	u.RawQuery = createQueryParams(b.queryParams).Encode()

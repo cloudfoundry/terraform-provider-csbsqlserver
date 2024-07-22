@@ -23,7 +23,7 @@ const (
 	providerName = "csbsqlserver"
 )
 
-var _ = Describe("csbsqlserver_binding resource", func() {
+var _ = Describe("csbsqlserver_binding resource", Label("binding"), func() {
 
 	Context("database exists", func() {
 		When("bindings are created", func() {
@@ -62,6 +62,24 @@ var _ = Describe("csbsqlserver_binding resource", func() {
 			})
 		})
 	})
+
+	Context("database does not exists and it passed as parameter in the binding phase", func() {
+		When("binding is created", func() {
+			It("should create the database passed as parameter", func() {
+				var (
+					adminPassword = testhelpers.RandomPassword()
+					port          = testhelpers.FreePort()
+				)
+
+				shutdownServerFn := testhelpers.StartServer(adminPassword, port, testhelpers.WithSPConfigure())
+				DeferCleanup(func() { shutdownServerFn(time.Minute) })
+
+				cnf := createTestCaseCnf(adminPassword, port).withDifferentDatabase(testhelpers.RandomDatabaseName())
+
+				resource.Test(GinkgoT(), getTestCase(cnf, getMandatoryStep(cnf)))
+			})
+		})
+	})
 })
 
 type testCaseCnf struct {
@@ -72,6 +90,7 @@ type testCaseCnf struct {
 	BindingPasswordOne     string
 	BindingPasswordTwo     string
 	DatabaseName           string
+	DifferentDatabase      string
 	AdminPassword          string
 	Port                   int
 	provider               *schema.Provider
@@ -93,10 +112,22 @@ func createTestCaseCnf(adminPassword string, port int) testCaseCnf {
 	}
 }
 
+func (c testCaseCnf) withDifferentDatabase(databaseName string) testCaseCnf {
+	c.DifferentDatabase = databaseName
+	return c
+}
+
+func (c testCaseCnf) getDatabaseName() string {
+	if c.DifferentDatabase != "" {
+		return c.DifferentDatabase
+	}
+	return c.DatabaseName
+}
+
 func getTestCase(cnf testCaseCnf, steps ...resource.TestStep) resource.TestCase {
 	var (
 		bindingUser1, bindingUser2 = cnf.BindingUserOne, cnf.BindingUserTwo
-		databaseName               = cnf.DatabaseName
+		databaseName               = cnf.getDatabaseName()
 		provider                   = cnf.provider
 		db                         = testhelpers.Connect(testhelpers.AdminUser, cnf.AdminPassword, databaseName, cnf.Port)
 	)
@@ -122,14 +153,24 @@ func getMandatoryStep(cnf testCaseCnf, extraTestCheckFunc ...resource.TestCheckF
 		tfStateResourceBinding2Name        = cnf.ResourceBindingTwoName
 		bindingUser1, bindingUser2         = cnf.BindingUserOne, cnf.BindingUserTwo
 		bindingPassword1, bindingPassword2 = cnf.BindingPasswordOne, cnf.BindingPasswordTwo
-		databaseName                       = cnf.DatabaseName
+		databaseName                       = cnf.getDatabaseName()
+		differentDatabase                  = cnf.DifferentDatabase
 		db                                 = testhelpers.Connect(testhelpers.AdminUser, cnf.AdminPassword, databaseName, cnf.Port)
 	)
 
 	return resource.TestStep{
 		ResourceName: csbsqlserver.ResourceNameKey,
-		Config:       testGetConfiguration(cnf.Port, cnf.AdminPassword, bindingUser1, bindingPassword1, bindingUser2, bindingPassword2, databaseName),
-		ExpectError:  cnf.ExpectError,
+		Config: testGetConfiguration(
+			cnf.Port,
+			cnf.AdminPassword,
+			bindingUser1,
+			bindingPassword1,
+			bindingUser2,
+			bindingPassword2,
+			databaseName,
+			differentDatabase,
+		),
+		ExpectError: cnf.ExpectError,
 		Check: resource.ComposeTestCheckFunc(
 			resource.TestCheckResourceAttr(tfStateResourceBinding1Name, "username", bindingUser1),
 			resource.TestCheckResourceAttr(tfStateResourceBinding1Name, "password", bindingPassword1),
@@ -164,12 +205,20 @@ func getStepOnlyBindingOne(cnf testCaseCnf, extraTestCheckFunc ...resource.TestC
 		bindingUser1                = cnf.BindingUserOne
 		bindingPassword1            = cnf.BindingPasswordOne
 		databaseName                = cnf.DatabaseName
+		differentDatabase           = cnf.DifferentDatabase
 		db                          = testhelpers.Connect(testhelpers.AdminUser, cnf.AdminPassword, databaseName, cnf.Port)
 	)
 
 	return resource.TestStep{
 		ResourceName: csbsqlserver.ResourceNameKey,
-		Config:       testGetConfigurationOnlyBindingOne(cnf.Port, cnf.AdminPassword, bindingUser1, bindingPassword1, databaseName),
+		Config: testGetConfigurationOnlyBindingOne(
+			cnf.Port,
+			cnf.AdminPassword,
+			bindingUser1,
+			bindingPassword1,
+			databaseName,
+			differentDatabase,
+		),
 		Check: resource.ComposeTestCheckFunc(
 			resource.TestCheckResourceAttr(tfStateResourceBinding1Name, "username", bindingUser1),
 			resource.TestCheckResourceAttr(tfStateResourceBinding1Name, "password", bindingPassword1),
@@ -248,7 +297,7 @@ func initTestProvider() *schema.Provider {
 	return testAccProvider
 }
 
-func testGetConfiguration(port int, adminPassword, bindingUser1, bindingPassword1, bindingUser2, bindingPassword2, databaseName string) string {
+func testGetConfiguration(port int, adminPassword, bindingUser1, bindingPassword1, bindingUser2, bindingPassword2, databaseName, differentDatabase string) string {
 	return fmt.Sprintf(`
 			provider "csbsqlserver" {
 				server   = "%s"
@@ -263,12 +312,14 @@ func testGetConfiguration(port int, adminPassword, bindingUser1, bindingPassword
 				username = "%s"
 				password = "%s"
 				roles    = ["db_ddladmin", "db_datareader", "db_datawriter", "db_accessadmin"]
+				database = "%s"
 			}
 
 			resource "csbsqlserver_binding" "binding2" {
 				username   = "%s"
 				password   = "%s"
 				roles      = ["db_ddladmin", "db_datareader", "db_datawriter", "db_accessadmin"]
+				database = "%s"
                 depends_on = [csbsqlserver_binding.binding1]
 			}`,
 		testhelpers.Server,
@@ -278,12 +329,14 @@ func testGetConfiguration(port int, adminPassword, bindingUser1, bindingPassword
 		adminPassword,
 		bindingUser1,
 		bindingPassword1,
+		differentDatabase,
 		bindingUser2,
 		bindingPassword2,
+		differentDatabase,
 	)
 }
 
-func testGetConfigurationOnlyBindingOne(port int, adminPassword, bindingUser1, bindingPassword1, databaseName string) string {
+func testGetConfigurationOnlyBindingOne(port int, adminPassword, bindingUser1, bindingPassword1, databaseName, differentDatabase string) string {
 	return fmt.Sprintf(`
 			provider "csbsqlserver" {
 				server   = "%s"
@@ -298,6 +351,7 @@ func testGetConfigurationOnlyBindingOne(port int, adminPassword, bindingUser1, b
 				username = "%s"
 				password = "%s"
 				roles    = ["db_ddladmin", "db_datareader", "db_datawriter", "db_accessadmin"]
+				database = "%s"
 			}`,
 		testhelpers.Server,
 		port,
@@ -306,5 +360,6 @@ func testGetConfigurationOnlyBindingOne(port int, adminPassword, bindingUser1, b
 		adminPassword,
 		bindingUser1,
 		bindingPassword1,
+		differentDatabase,
 	)
 }
