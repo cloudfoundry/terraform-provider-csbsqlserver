@@ -65,7 +65,7 @@ func runServerOrFail(password string, port int, cmd *exec.Cmd) ShutdownServerFn 
 		}
 	}
 	return func(duration time.Duration) {
-		session.Terminate().Wait(duration)
+		session.Kill().Wait(duration)
 	}
 }
 
