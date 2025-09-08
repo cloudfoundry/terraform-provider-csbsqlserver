@@ -4,15 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-
+	"github.com/cloudfoundry/terraform-provider-csbsqlserver/testhelpers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	"github.com/cloudfoundry/terraform-provider-csbsqlserver/testhelpers"
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("csbsqlserver_binding resource", func() {
@@ -527,14 +526,7 @@ func findSchemaByOwner(db *sql.DB, entityOwner string, expectedSchemaName string
 		return false, rows.Err()
 	}
 
-	found := false
-	for _, schema := range schemas {
-		if schema == expectedSchemaName {
-			found = true
-			break
-		}
-	}
-	return found, nil
+	return slices.Contains(schemas, expectedSchemaName), nil
 }
 
 func getCreateTableSQL(tableName string) string {
